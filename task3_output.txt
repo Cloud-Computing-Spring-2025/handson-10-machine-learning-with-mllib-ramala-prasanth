@@ -1,0 +1,6 @@
+Top 5 selected features using Chi-Square Test:
+Row(selectedFeatures=DenseVector([1.0, 21.0, 77.93, 0.0, 1.0]), label=0.0)
+Row(selectedFeatures=SparseVector(5, {1: 10.0, 2: 72.24}), label=1.0)
+Row(selectedFeatures=SparseVector(5, {1: 6.0, 2: 83.4, 3: 1.0}), label=0.0)
+Row(selectedFeatures=DenseVector([0.0, 23.0, 76.49, 1.0, 0.0]), label=0.0)
+Row(selectedFeatures=DenseVector([0.0, 2.0, 105.57, 0.0, 1.0]), label=1.0)
