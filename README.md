@@ -148,3 +148,114 @@ python dataset-generator.py
 spark-submit customer-churn-analysis.py
 ```
 ### Output is included in the text files.
+
+🧹 Task 1: Data Preprocessing and Feature Engineering
+def preprocess_data(df):
+1.1 Fill Missing Values
+```
+df = df.withColumn("TotalCharges", when(col("TotalCharges").isNull() | (col("TotalCharges") == ""), 0).otherwise(col("TotalCharges").cast("double")))
+```
+Replaces null or blank TotalCharges with 0 and casts to numeric.
+
+1.2 Encode Label Column
+```
+label_indexer = StringIndexer(inputCol="Churn", outputCol="label")
+df = label_indexer.fit(df).transform(df)
+```
+Converts Churn column from "Yes"/"No" to 1/0 for binary classification.
+
+1.3 Index and One-Hot Encode Categorical Features
+```
+categorical_cols = ["gender", "PhoneService", "InternetService"]
+...
+```
+Each categorical feature is transformed via:
+
+StringIndexer → assigns index values to categories.
+
+OneHotEncoder → converts indexed values into binary vector format.
+
+1.4 Assemble All Features
+```
+assembler = VectorAssembler(inputCols=assembler_inputs, outputCol="features")
+final_df = assembler.transform(df)
+```
+Combines all numeric columns and encoded vectors into a single features vector required by Spark ML models.
+
+🤖 Task 2: Train and Evaluate Logistic Regression
+```
+def train_logistic_regression_model(df):
+```
+2.1 Split Data
+```
+train_df, test_df = df.randomSplit([0.8, 0.2], seed=42)
+```
+Splits data into 80% training and 20% test sets.
+
+2.2 Train Logistic Regression
+```
+lr = LogisticRegression(featuresCol="features", labelCol="label")
+model = lr.fit(train_df)
+```
+Trains a logistic regression classifier on the training data.
+
+2.3 Evaluate Model
+```
+predictions = model.transform(test_df)
+...
+auc = evaluator.evaluate(predictions)
+```
+Evaluates model performance using AUC (Area Under ROC Curve).
+
+🧪 Task 3: Feature Selection using Chi-Square Test
+```
+def feature_selection(df):
+```
+Uses ChiSqSelector to identify top 5 features most associated with the target label.
+
+```
+selector = ChiSqSelector(numTopFeatures=5, featuresCol="features", labelCol="label", outputCol="selectedFeatures")
+```
+Outputs a new DataFrame with the reduced selectedFeatures vector.
+
+🎯 Task 4: Hyperparameter Tuning & Model Comparison
+```
+def tune_and_compare_models(df):
+```
+4.1 Define Models and Parameter Grids
+Four models are defined:
+
+LogisticRegression
+
+DecisionTreeClassifier
+
+RandomForestClassifier
+
+GBTClassifier (Gradient Boosted Trees)
+```
+paramGrids = {
+    "LogisticRegression": ParamGridBuilder().addGrid(models["LogisticRegression"].regParam, [0.01, 0.1]).build(),
+    ...
+}
+```
+4.2 CrossValidator Setup
+```
+cv = CrossValidator(estimator=model, estimatorParamMaps=grid, evaluator=evaluator, numFolds=5)
+```
+For each model, 5-fold cross-validation is performed to find the best hyperparameters and compute AUC.
+
+4.3 Compare and Report
+AUC scores and best parameters for each model are written to task4_output.txt.
+
+📝 Output Writing
+Each task appends its results to a corresponding .txt file for recordkeeping:
+
+```
+with open("taskX_output.txt", "a") as f:
+    f.write(...)
+```
+```
+spark.stop()
+```
+Closes the Spark session after all tasks complete.
+
